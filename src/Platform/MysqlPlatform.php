@@ -1,15 +1,15 @@
 <?php
 
-namespace APinnecke\CompositeNumberRange\Platform;
+namespace FelixWillmann\CompositeNumberRange\Platform;
 
-use APinnecke\CompositeNumberRange\CompositeNumberRangeBehavior;
+use FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior;
 use Propel\Generator\Model\Diff\TableDiff;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MysqlPlatform as BaseMysqlPlatform;
 
 class MysqlPlatform extends BaseMysqlPlatform
 {
-    const BEHAVIOR_NAME = '\APinnecke\CompositeNumberRange\CompositeNumberRangeBehavior';
+    const BEHAVIOR_NAME = '\FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior';
 
     /**
      * Returns the actual trigger name in the database. Handy if you don't have the behavior definition

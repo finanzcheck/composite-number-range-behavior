@@ -1,5 +1,5 @@
 {
-  "name": "apinnecke/composite-number-range-behavior",
+  "name": "felixwillmann/composite-number-range-behavior",
   "description": "A behavior providing composite number ranges with a foreign key and a composite key.",
   "license": "MIT",
   "require": {
@@ -10,7 +10,7 @@
   },
   "autoload": {
     "psr-4": {
-      "APinnecke\\CompositeNumberRange\\": "src/"
+      "FelixWillmann\\CompositeNumberRange\\": "src/"
     }
   },
   "authors": [
@@ -21,6 +21,6 @@
   ],
   "extra": {
     "name": "composite_number_range",
-    "class": "\\APinnecke\\CompositeNumberRange\\CompositeNumberRangeBehavior"
+    "class": "\\FelixWillmann\\CompositeNumberRange\\CompositeNumberRangeBehavior"
   }
 }

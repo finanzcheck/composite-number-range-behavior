@@ -59,7 +59,7 @@ propel:
     generator:
         defaultConnection: default
         connections:       [ default ]
-        platformClass:     \APinnecke\CompositeNumberRange\Platform\MysqlPlatform
+        platformClass:     \FelixWillmann\CompositeNumberRange\Platform\MysqlPlatform
 ```
 
 ## Add behavior to table
@@ -69,7 +69,7 @@ Following the user <-> document example:
 ```xml
 <table name="document">
     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
-    <behavior name="\APinnecke\CompositeNumberRange\CompositeNumberRangeBehavior">
+    <behavior name="\FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior">
         <parameter name="foreignTable" value="user"/>
     </behavior>
 </table>
