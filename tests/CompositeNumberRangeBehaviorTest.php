@@ -2,7 +2,7 @@
 
 namespace Propel\Tests\Generator\Behavior\CompositeNumberRange;
 
-use APinnecke\CompositeNumberRange\Platform\MysqlPlatform;
+use FelixWillmann\CompositeNumberRange\Platform\MysqlPlatform;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\Adapter\Pdo\MysqlAdapter;
 use Propel\Runtime\Collection\ObjectCollection;
@@ -25,7 +25,7 @@ class CompositeNumberRangeBehaviorTest extends TestCase
     <table name="child_table">
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
         <column name="name" type="VARCHAR" size="50" required="false" />
-        <behavior name="\APinnecke\CompositeNumberRange\CompositeNumberRangeBehavior">
+        <behavior name="\FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior">
             <parameter name="foreignTable" value="parent_table"/>
         </behavior>
     </table>

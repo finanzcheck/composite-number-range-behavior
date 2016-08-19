@@ -1,6 +1,6 @@
 <?php
 
-namespace APinnecke\CompositeNumberRange;
+namespace FelixWillmann\CompositeNumberRange;
 
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Column;
@@ -11,7 +11,8 @@ class CompositeNumberRangeBehavior extends Behavior
 {
     protected $parameters = array(
         'foreignTable' => null,
-        'refPhpName' => null
+        'refPhpName' => null,
+        'phpName' => null,
     );
 
     /**
@@ -47,6 +48,18 @@ class CompositeNumberRangeBehavior extends Behavior
     }
 
     /**
+     * Gets the phpName parameter from config array.
+     * will only be set if !== null
+     *
+     * @return string
+     */
+    protected function getPhpName()
+    {
+        $name = $this->getParameter('phpName');
+        return $name;
+    }
+
+    /**
      * Adds all columns, indexes, constraints and additional tables.
      */
     public function modifyTable()
@@ -54,6 +67,7 @@ class CompositeNumberRangeBehavior extends Behavior
         $table = $this->getTable();
         $tableName = $table->getName();
         $foreignTableName = $this->getForeignTable();
+        $phpName = $this->getPhpName();
 
         // enable reload on insert to force the model to load the trigger generated id(s)
         $table->setReloadOnInsert(true);
@@ -90,6 +104,9 @@ class CompositeNumberRangeBehavior extends Behavior
             $foreignKey->setForeignTableCommonName($foreignTableName);
             $foreignKey->setOnUpdate(ForeignKey::CASCADE);
             $foreignKey->setOnDelete(ForeignKey::CASCADE);
+            if (null !== $phpName) {
+                $foreignKey->setPhpName($phpName);
+            }
             $table->addForeignKey($foreignKey);
 
         }
