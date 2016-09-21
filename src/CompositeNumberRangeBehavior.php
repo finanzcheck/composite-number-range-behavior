@@ -9,6 +9,8 @@ use Propel\Generator\Model\Unique;
 
 class CompositeNumberRangeBehavior extends Behavior
 {
+    protected $compositeKeyColumnName;
+
     protected $parameters = array(
         'foreignTable' => null,
         'refPhpName' => null,
@@ -73,7 +75,7 @@ class CompositeNumberRangeBehavior extends Behavior
         $table->setReloadOnInsert(true);
 
         $foreignIdColumnName = $foreignTableName . '_id';
-        $compositeKeyColumnName = $foreignTableName . '_' . $tableName . '_id';
+        $this->compositeKeyColumnName = $foreignTableName . '_' . $tableName . '_id';
 
         if ($table->hasBehavior('concrete_inheritance')) {
             // we're a child in a concrete inheritance
@@ -111,19 +113,19 @@ class CompositeNumberRangeBehavior extends Behavior
 
         }
 
-        if ($table->hasColumn($compositeKeyColumnName)) {
-            $compositeKeyColumn = $table->getColumn($compositeKeyColumnName);
+        if ($table->hasColumn($this->compositeKeyColumnName)) {
+            $compositeKeyColumn = $table->getColumn($this->compositeKeyColumnName);
         } else {
             $compositeKeyColumn = $table->addColumn(
                 array(
-                    'name' => $compositeKeyColumnName,
+                    'name' => $this->compositeKeyColumnName,
                     'type' => 'integer',
                     'required' => false,
                 )
             );
         }
 
-        $index = new Unique($tableName . '_UQ_' . $foreignIdColumnName . '_' . $compositeKeyColumnName);
+        $index = new Unique($tableName . '_UQ_' . $foreignIdColumnName . '_' . $this->compositeKeyColumnName);
         $index->addColumn($foreignIdColumn);
         $index->addColumn($compositeKeyColumn);
         $table->addUnique($index);
@@ -170,4 +172,57 @@ class CompositeNumberRangeBehavior extends Behavior
             );
         }
     }
+
+    public function postUpdate()
+    {
+        if ($this->parentHasBehaviour()) {
+            return null;
+        }
+        return "\$this->reloadAfterCompositeNumberUpdate();";
+    }
+
+    public function objectMethods($builder)
+    {
+        if ($this->parentHasBehaviour()) {
+            return null;
+        }
+
+        $this->builder = $builder;
+        $script = '';
+
+        $this->addReloadAfterCompositeNumberUpdate($script);
+
+        return $script;
+    }
+
+    private function addReloadAfterCompositeNumberUpdate(&$script)
+    {
+        $script .= <<<EOM
+/**
+ * Reload object after updated composite number field
+ */
+public function reloadAfterCompositeNumberUpdate()
+{
+    \$compositeNumberField = "{$this->compositeKeyColumnName}";
+    
+    if (null === \$this->\$compositeNumberField) {
+        \$this->reload();
+    }
+}
+EOM;
+    }
+
+    private function parentHasBehaviour()
+    {
+        $table = $this->getTable();
+        if ($table->hasBehavior('concrete_inheritance')) {
+            $parentTableName = $table->getBehavior('concrete_inheritance')->getParameter('extends');
+            $parentTable = $table->getDatabase()->getTable($parentTableName);
+            if ($parentTable->hasBehavior('\\' . __CLASS__)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

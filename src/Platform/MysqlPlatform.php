@@ -19,15 +19,23 @@ class MysqlPlatform extends BaseMysqlPlatform
      *
      * @return string|null
      */
-    protected function getExistingTriggerName(Table $table)
+    protected function getExistingTriggerNames(Table $table)
     {
         $con = $this->getConnection();
+
+echo "Checking the {$table->getName()} \n";
 
         $sql = "SHOW TRIGGERS WHERE `Table` = ? AND `Trigger` LIKE 'set%Id'";
         $stmt = $con->prepare($sql);
         $stmt->execute([$table->getName()]);
+        $ret = $stmt->fetchAll();
 
-        return $stmt->fetchColumn();
+        $names = [];
+        foreach($ret as $trigger) {
+            $names []= $trigger['Trigger'];
+        }
+
+        return $names;
     }
 
     /**
@@ -40,7 +48,7 @@ class MysqlPlatform extends BaseMysqlPlatform
         $fromTable = $tableDiff->getFromTable();
         $toTable = $tableDiff->getToTable();
 
-        $hasTrigger = $this->hasTrigger($fromTable);
+        $hasTrigger = $this->hasTriggers($fromTable);
 
         // if from-table has a trigger but to-table don't need it anymore, then drop it
         $needDrop = $hasTrigger && !$this->hasCompositeNumberRangeBehavior($toTable);
@@ -50,10 +58,11 @@ class MysqlPlatform extends BaseMysqlPlatform
 
         switch (true) {
             case $needCreate:
-                $ret .= $this->createTriggerDDL($toTable);
+                $ret .= $this->createDropTriggersDDL($toTable);
+                $ret .= $this->createTriggersDDL($toTable);
                 break;
             case $needDrop:
-                $ret .= $this->createDropTriggerDDL($toTable);
+                $ret .= $this->createDropTriggersDDL($toTable);
                 break;
         }
 
@@ -68,9 +77,9 @@ class MysqlPlatform extends BaseMysqlPlatform
      *
      * @return bool
      */
-    protected function hasTrigger(Table $table)
+    protected function hasTriggers(Table $table)
     {
-        return (boolean) $this->getExistingTriggerName($table);
+        return count($this->getExistingTriggerNames($table)) == 2;
     }
 
     /**
@@ -108,7 +117,7 @@ class MysqlPlatform extends BaseMysqlPlatform
         $ret = parent::getAddTableDDL($table);
 
         if ($this->hasCompositeNumberRangeBehavior($table)) {
-            $ret .= $this->createTriggerDDL($table);
+            $ret .= $this->createTriggersDDL($table);
         }
 
         return $ret;
@@ -121,11 +130,15 @@ class MysqlPlatform extends BaseMysqlPlatform
      *
      * @return string
      */
-    protected function createDropTriggerDDL(Table $table)
+    protected function createDropTriggersDDL(Table $table)
     {
-        $triggerName = $this->getExistingTriggerName($table);
+        $triggerNames = $this->getExistingTriggerNames($table);
 
-        return "DROP TRIGGER IF EXISTS $triggerName;\n";
+        $sql = "";
+        foreach($triggerNames as $triggerName) {
+            $sql .= "DROP TRIGGER IF EXISTS $triggerName;\n";
+        }
+        return $sql;
     }
 
     /**
@@ -135,7 +148,7 @@ class MysqlPlatform extends BaseMysqlPlatform
      *
      * @return string
      */
-    protected function getTriggerName(Table $table)
+    protected function getTriggerNames(Table $table)
     {
         $tableName = $table->getName();
 
@@ -143,7 +156,10 @@ class MysqlPlatform extends BaseMysqlPlatform
         $behavior = $table->getBehavior(self::BEHAVIOR_NAME);
         $foreignTableName = $behavior->getForeignTable();
 
-        return str_replace(' ', '', ucwords(str_replace('_', ' ', 'set' . ucfirst($foreignTableName) . ucfirst($tableName) . 'Id')));
+        $insertTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'set' . ucfirst($foreignTableName) . ucfirst($tableName) . 'Id')));
+        $updateTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'setOnUpdate' . ucfirst($foreignTableName) . ucfirst($tableName) . 'Id')));
+
+        return [ $insertTrigger, $updateTrigger ];
     }
 
     /**
@@ -153,19 +169,19 @@ class MysqlPlatform extends BaseMysqlPlatform
      *
      * @return string
      */
-    protected function createTriggerDDL(Table $table)
+    protected function createTriggersDDL(Table $table)
     {
 
         /** @var CompositeNumberRangeBehavior $behavior */
         $behavior = $table->getBehavior(self::BEHAVIOR_NAME);
         $foreignTableName = $behavior->getForeignTable();
-        $triggerName = $this->getTriggerName($table);
+        $triggerNames = $this->getTriggerNames($table);
         $tableName = $table->getName();
 
         $sql = "
 DELIMITER $;
 
-CREATE TRIGGER {$triggerName}
+CREATE TRIGGER {$triggerNames[0]}
 BEFORE INSERT ON ${tableName}
 FOR EACH ROW
 BEGIN
@@ -177,6 +193,26 @@ BEGIN
         UPDATE ${foreignTableName}_max_sequence_id = LAST_INSERT_ID(${foreignTableName}_max_sequence_id +1);
 
     SET NEW.${foreignTableName}_${tableName}_id = LAST_INSERT_ID();
+END
+
+DELIMITER ;
+
+DELIMITER $;
+
+CREATE TRIGGER {$triggerNames[1]}
+BEFORE UPDATE ON ${tableName}
+FOR EACH ROW
+BEGIN
+    IF NEW.${foreignTableName}_${tableName}_id IS NULL THEN
+        INSERT INTO ${foreignTableName}_sequence (
+            table_name, ${foreignTableName}_id, ${foreignTableName}_max_sequence_id
+        ) VALUES (
+            '${tableName}', NEW.${foreignTableName}_id, LAST_INSERT_ID(1)
+        ) ON DUPLICATE KEY
+            UPDATE ${foreignTableName}_max_sequence_id = LAST_INSERT_ID(${foreignTableName}_max_sequence_id +1);
+    
+        SET NEW.${foreignTableName}_${tableName}_id = LAST_INSERT_ID();
+    END IF;
 END
 
 DELIMITER ;
