@@ -9,7 +9,7 @@ use Propel\Generator\Platform\MysqlPlatform as BaseMysqlPlatform;
 
 class MysqlPlatform extends BaseMysqlPlatform
 {
-    const BEHAVIOR_NAME = '\FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior';
+    const BEHAVIOR_NAME = '\Finanzcheck\CompositeNumberRange\CompositeNumberRangeBehavior';
 
     /**
      * Returns the actual trigger name in the database. Handy if you don't have the behavior definition

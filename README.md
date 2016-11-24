@@ -2,12 +2,6 @@
 
 A behavior for Propel 2 which provides number ranges in combination of a composite key. **This Behavior only works in MySQL!**
 
-[![Build Status](https://travis-ci.org/finanzcheck/composite-number-range-behavior.svg?branch=master)](https://travis-ci.org/finanzcheck/composite-number-range-behavior)
-[![Latest Stable Version](https://poser.pugx.org/finanzcheck/composite-number-range-behavior/v/stable.png)](https://packagist.org/packages/finanzcheck/composite-number-range-behavior)
-[![Total Downloads](https://poser.pugx.org/finanzcheck/composite-number-range-behavior/downloads.png)](https://packagist.org/packages/finanzcheck/composite-number-range-behavior)
-
----
-
 ## Dafuq? Number Range? What's that?
 
 Consider having a table with an autoincrement id field, a foreign key and an composite id field behaving as an autoincrement
