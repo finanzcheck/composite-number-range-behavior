@@ -1,6 +1,6 @@
 <?php
 
-namespace FelixWillmann\CompositeNumberRange;
+namespace Finanzcheck\CompositeNumberRange;
 
 use Propel\Generator\Model\Behavior;
 use Propel\Generator\Model\Column;

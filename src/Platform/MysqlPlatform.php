@@ -1,8 +1,8 @@
 <?php
 
-namespace FelixWillmann\CompositeNumberRange\Platform;
+namespace Finanzcheck\CompositeNumberRange\Platform;
 
-use FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior;
+use Finanzcheck\CompositeNumberRange\CompositeNumberRangeBehavior;
 use Propel\Generator\Model\Diff\TableDiff;
 use Propel\Generator\Model\Table;
 use Propel\Generator\Platform\MysqlPlatform as BaseMysqlPlatform;
@@ -203,7 +203,7 @@ CREATE TRIGGER {$triggerNames[1]}
 BEFORE UPDATE ON ${tableName}
 FOR EACH ROW
 BEGIN
-    IF NEW.${foreignTableName}_${tableName}_id IS NULL THEN
+    IF NEW.${foreignTableName}_${tableName}_id IS NULL OR NEW.${foreignTableName}_${tableName}_id = 0 THEN
         INSERT INTO ${foreignTableName}_sequence (
             table_name, ${foreignTableName}_id, ${foreignTableName}_max_sequence_id
         ) VALUES (

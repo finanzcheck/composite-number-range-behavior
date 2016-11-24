@@ -2,9 +2,9 @@
 
 A behavior for Propel 2 which provides number ranges in combination of a composite key. **This Behavior only works in MySQL!**
 
-[![Build Status](https://travis-ci.org/apinnecke/composite-number-range-behavior.svg?branch=master)](https://travis-ci.org/apinnecke/composite-number-range-behavior)
-[![Latest Stable Version](https://poser.pugx.org/apinnecke/composite-number-range-behavior/v/stable.png)](https://packagist.org/packages/apinnecke/composite-number-range-behavior)
-[![Total Downloads](https://poser.pugx.org/apinnecke/composite-number-range-behavior/downloads.png)](https://packagist.org/packages/apinnecke/composite-number-range-behavior)
+[![Build Status](https://travis-ci.org/finanzcheck/composite-number-range-behavior.svg?branch=master)](https://travis-ci.org/finanzcheck/composite-number-range-behavior)
+[![Latest Stable Version](https://poser.pugx.org/finanzcheck/composite-number-range-behavior/v/stable.png)](https://packagist.org/packages/finanzcheck/composite-number-range-behavior)
+[![Total Downloads](https://poser.pugx.org/finanzcheck/composite-number-range-behavior/downloads.png)](https://packagist.org/packages/finanzcheck/composite-number-range-behavior)
 
 ---
 
@@ -59,7 +59,7 @@ propel:
     generator:
         defaultConnection: default
         connections:       [ default ]
-        platformClass:     \FelixWillmann\CompositeNumberRange\Platform\MysqlPlatform
+        platformClass:     \Finanzcheck\CompositeNumberRange\Platform\MysqlPlatform
 ```
 
 ## Add behavior to table
@@ -69,7 +69,7 @@ Following the user <-> document example:
 ```xml
 <table name="document">
     <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
-    <behavior name="\FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior">
+    <behavior name="\Finanzcheck\CompositeNumberRange\CompositeNumberRangeBehavior">
         <parameter name="foreignTable" value="user"/>
     </behavior>
 </table>

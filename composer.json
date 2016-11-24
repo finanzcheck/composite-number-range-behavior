@@ -10,7 +10,7 @@
   },
   "autoload": {
     "psr-4": {
-      "FelixWillmann\\CompositeNumberRange\\": "src/"
+      "Finanzcheck\\CompositeNumberRange\\": "src/"
     }
   },
   "authors": [
@@ -21,6 +21,6 @@
   ],
   "extra": {
     "name": "composite_number_range",
-    "class": "\\FelixWillmann\\CompositeNumberRange\\CompositeNumberRangeBehavior"
+    "class": "\\Finanzcheck\\CompositeNumberRange\\CompositeNumberRangeBehavior"
   }
 }

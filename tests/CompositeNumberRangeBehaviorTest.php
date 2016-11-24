@@ -2,7 +2,7 @@
 
 namespace Propel\Tests\Generator\Behavior\CompositeNumberRange;
 
-use FelixWillmann\CompositeNumberRange\Platform\MysqlPlatform;
+use Finanzcheck\CompositeNumberRange\Platform\MysqlPlatform;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\Adapter\Pdo\MysqlAdapter;
 use Propel\Runtime\Collection\ObjectCollection;
@@ -25,7 +25,7 @@ class CompositeNumberRangeBehaviorTest extends TestCase
     <table name="child_table">
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
         <column name="name" type="VARCHAR" size="50" required="false" />
-        <behavior name="\FelixWillmann\CompositeNumberRange\CompositeNumberRangeBehavior">
+        <behavior name="\Finanzcheck\CompositeNumberRange\CompositeNumberRangeBehavior">
             <parameter name="foreignTable" value="parent_table"/>
         </behavior>
     </table>
@@ -157,6 +157,27 @@ EOF;
         $this->assertEquals('child_table', $sequence->getTableName());
         $this->assertEquals($parent2Id, $sequence->getParentTableId());
         $this->assertEquals($child2->getParentTableChildTableId(), $sequence->getParentTableMaxSequenceId());
+    }
+
+    /**
+     * @depends testColumnsAreCreatedCorrectly
+     */
+    public function testNullingParentTableIdForExistingRowCreatesNewParentTableId()
+    {
+        $parentId = $this->parent->getId();
+
+        $child = new \ChildTable();
+        $child->setName('test');
+        $child->setParentTableId($parentId);
+        $child->save();
+
+        $firstParentTableId = $child->getParentTableId();
+        $this->assertGreaterThan(0, $firstParentTableId);
+
+        $child->setParentTableId(null);
+        $child->save();
+
+        $this->assertGreaterThan($firstParentTableId, $child->getParentTableId());
     }
 }
  
