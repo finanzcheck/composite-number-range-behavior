@@ -1,0 +1,19 @@
+type: library
+name: Propel composite number range behavior
+id: propel-composite-number-range-behavior
+product: Propel
+vertical: finanzcheck
+description: |
+  A Propel 2 behavior providing composite number ranges with a foreign key and a composite key.
+owners:
+  - team.prism@finanzcheck.de
+tags:
+  - propel
+confidentiality: company-internal
+integrity: true
+availability: true
+license: Proprietary
+authenticity: true
+exposure:
+  - back-office finanzcheck
+lifecycle: ga
