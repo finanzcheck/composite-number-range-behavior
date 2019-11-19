@@ -1,18 +1,25 @@
 language: php
 sudo: false
 
+branches:
+  only:
+    - master
+    - develop
+
 php:
-  - 5.4
-  - 5.5
-  - 5.6
-  - hhvm
+  - 7.1
+  - 7.2
+  - 7.3
+
+services:
+  - mysql
 
 before_script:
   - composer install
   - mysql -e 'create database behavior_test;'
 
 script:
-  - phpunit
+  - vendor/bin/phpunit
 
 env:
   - DB_USER=travis DB_PASS= DB_NAME=behavior_test

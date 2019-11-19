@@ -6,6 +6,7 @@ use Finanzcheck\CompositeNumberRange\Platform\MysqlPlatform;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\Adapter\Pdo\MysqlAdapter;
 use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Propel;
 use Propel\Tests\TestCase;
 
 class CompositeNumberRangeBehaviorTest extends TestCase
@@ -35,7 +36,12 @@ EOF;
             $builder = new QuickBuilder();
             $builder->setPlatform(new MysqlPlatform());
             $builder->setSchema($schema);
-            $builder->build('mysql:host=127.0.0.1;dbname=' . getenv('DB_NAME'), getenv('DB_USER'), getenv('DB_PASS'), new MysqlAdapter());
+            $builder->build(
+                'mysql:host=127.0.0.1;dbname=' . getenv('DB_NAME'),
+                getenv('DB_USER'),
+                getenv('DB_PASS'),
+                new MysqlAdapter()
+            );
         }
 
         $this->parent = new \ParentTable();
@@ -164,6 +170,10 @@ EOF;
      */
     public function testNullingParentTableIdForExistingRowCreatesNewParentTableId()
     {
+        $tableMapClass = \ParentTable::TABLE_MAP;
+        $con = Propel::getServiceContainer()->getWriteConnection($tableMapClass::DATABASE_NAME);
+        $con->exec('ALTER TABLE child_table CHANGE parent_table_id parent_table_id INT(11) DEFAULT NULL');
+
         $parentId = $this->parent->getId();
 
         $child = new \ChildTable();
@@ -176,6 +186,7 @@ EOF;
 
         $child->setParentTableId(null);
         $child->save();
+        $child->reload();
 
         $this->assertGreaterThan($firstParentTableId, $child->getParentTableId());
     }
