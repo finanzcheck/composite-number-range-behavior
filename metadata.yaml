@@ -1,0 +1,23 @@
+type: library
+owners:
+  - team.prism@finanzcheck.de
+product: propel-plugins
+id: finanzcheck-composite-number-range-behavior
+vertical: finanzcheck
+availability: false
+confidentiality: company-internal
+integrity: false
+authenticity: false
+exposure:
+  - non-applicable
+lifecycle: maintenance
+name: Composite Number Range Behavior
+description: Propel behavior for client scoped IDs
+links:
+  - type: repository
+    title: GitHub repository
+    address: https://github.com/finanzcheck/composite-number-range-behavior
+tags:
+  - php
+  - propel
+license: Proprietary
