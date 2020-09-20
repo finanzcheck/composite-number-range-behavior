@@ -150,14 +150,12 @@ echo "Checking the {$table->getName()} \n";
      */
     protected function getTriggerNames(Table $table)
     {
-        $tableName = $table->getName();
-
         /** @var CompositeNumberRangeBehavior $behavior */
         $behavior = $table->getBehavior(self::BEHAVIOR_NAME);
-        $foreignTableName = $behavior->getForeignTable();
+        $compositeKeyColumnName = $behavior->getCompositeKeyColumnName();
 
-        $insertTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'set' . ucfirst($foreignTableName) . ucfirst($tableName) . 'Id')));
-        $updateTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'setOnUpdate' . ucfirst($foreignTableName) . ucfirst($tableName) . 'Id')));
+        $insertTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'set' . ucfirst($compositeKeyColumnName))));
+        $updateTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'setOnUpdate' . ucfirst($compositeKeyColumnName))));
 
         return [ $insertTrigger, $updateTrigger ];
     }
@@ -177,6 +175,7 @@ echo "Checking the {$table->getName()} \n";
         $foreignTableName = $behavior->getForeignTable();
         $triggerNames = $this->getTriggerNames($table);
         $tableName = $table->getName();
+        $compositeKeyColumnName = $behavior->getCompositeKeyColumnName();
 
         $sql = "
 DELIMITER $;
@@ -192,7 +191,7 @@ BEGIN
     ) ON DUPLICATE KEY
         UPDATE ${foreignTableName}_max_sequence_id = LAST_INSERT_ID(${foreignTableName}_max_sequence_id +1);
 
-    SET NEW.${foreignTableName}_${tableName}_id = LAST_INSERT_ID();
+    SET NEW.${compositeKeyColumnName} = LAST_INSERT_ID();
 END
 
 DELIMITER ;
@@ -203,7 +202,7 @@ CREATE TRIGGER {$triggerNames[1]}
 BEFORE UPDATE ON ${tableName}
 FOR EACH ROW
 BEGIN
-    IF NEW.${foreignTableName}_${tableName}_id IS NULL OR NEW.${foreignTableName}_${tableName}_id = 0 THEN
+    IF NEW.${compositeKeyColumnName} IS NULL OR NEW.${compositeKeyColumnName} = 0 THEN
         INSERT INTO ${foreignTableName}_sequence (
             table_name, ${foreignTableName}_id, ${foreignTableName}_max_sequence_id
         ) VALUES (
@@ -211,7 +210,7 @@ BEGIN
         ) ON DUPLICATE KEY
             UPDATE ${foreignTableName}_max_sequence_id = LAST_INSERT_ID(${foreignTableName}_max_sequence_id +1);
     
-        SET NEW.${foreignTableName}_${tableName}_id = LAST_INSERT_ID();
+        SET NEW.${compositeKeyColumnName} = LAST_INSERT_ID();
     END IF;
 END
 

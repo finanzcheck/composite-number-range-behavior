@@ -13,6 +13,7 @@ class CompositeNumberRangeBehavior extends Behavior
 
     protected $parameters = array(
         'foreignTable' => null,
+        'compositeKeyColumnName' => null,
         'refPhpName' => null,
         'phpName' => null,
     );
@@ -61,6 +62,20 @@ class CompositeNumberRangeBehavior extends Behavior
         return $name;
     }
 
+    public function getCompositeKeyColumnName()
+    {
+        $name = $this->getParameter('compositeKeyColumnName');
+        if ($name) {
+            return $name;
+        }
+
+        $table = $this->getTable();
+        $tableName = $table->getName();
+        $foreignTableName = $this->getForeignTable();
+
+        return $foreignTableName . '_' . $tableName . '_id';
+    }
+
     /**
      * Adds all columns, indexes, constraints and additional tables.
      */
@@ -75,7 +90,8 @@ class CompositeNumberRangeBehavior extends Behavior
         $table->setReloadOnInsert(true);
 
         $foreignIdColumnName = $foreignTableName . '_id';
-        $this->compositeKeyColumnName = $foreignTableName . '_' . $tableName . '_id';
+
+        $this->compositeKeyColumnName = $this->getCompositeKeyColumnName();
 
         if ($table->hasBehavior('concrete_inheritance')) {
             // we're a child in a concrete inheritance
