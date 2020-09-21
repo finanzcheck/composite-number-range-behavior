@@ -191,7 +191,7 @@ EOF;
         $this->assertGreaterThan($firstParentTableId, $child->getParentTableId());
     }
 
-    public function testUsesTheCompositeKeyColumnNameParameterWhenGiven()
+    public function testUsesTheLocalTableAliasParameterWhenGiven()
     {
         $schema = <<<EOF
 <database name="composite_number_range_test">
@@ -202,7 +202,7 @@ EOF;
         <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
         <behavior name="\Finanzcheck\CompositeNumberRange\CompositeNumberRangeBehavior">
             <parameter name="foreignTable" value="foo"/>
-            <parameter name="compositeKeyColumnName" value="baz"/>
+            <parameter name="localTableAlias" value="baz"/>
         </behavior>
     </table>
 </database>
@@ -229,13 +229,21 @@ EOF;
 
         $this->assertTrue(method_exists($entity, 'setFoo'));
         $this->assertTrue(method_exists($entity, 'setFooId'));
-        $this->assertTrue(method_exists($entity, 'setBaz'));
+        $this->assertTrue(method_exists($entity, 'setFooBazId'));
 
         $sequenceEntity = new \FooSequence();
 
         $this->assertTrue(method_exists($sequenceEntity, 'setTableName'));
         $this->assertTrue(method_exists($sequenceEntity, 'setFooId'));
         $this->assertTrue(method_exists($sequenceEntity, 'setFooMaxSequenceId'));
+
+        $foo = new \Foo();
+        $foo->save();
+
+        $entity->setFoo($foo);
+        $entity->save();
+
+        $this->assertEquals($foo->getId(), $entity->getFooBazId());
     }
 }
  

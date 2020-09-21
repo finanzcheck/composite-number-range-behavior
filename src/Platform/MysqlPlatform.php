@@ -175,6 +175,7 @@ echo "Checking the {$table->getName()} \n";
         $foreignTableName = $behavior->getForeignTable();
         $triggerNames = $this->getTriggerNames($table);
         $tableName = $table->getName();
+        $tableNameOrAlias = $behavior->getLocalTableName();
         $compositeKeyColumnName = $behavior->getCompositeKeyColumnName();
 
         $sql = "
@@ -187,7 +188,7 @@ BEGIN
     INSERT INTO ${foreignTableName}_sequence (
         table_name, ${foreignTableName}_id, ${foreignTableName}_max_sequence_id
     ) VALUES (
-        '${tableName}', NEW.${foreignTableName}_id, LAST_INSERT_ID(1)
+        '${tableNameOrAlias}', NEW.${foreignTableName}_id, LAST_INSERT_ID(1)
     ) ON DUPLICATE KEY
         UPDATE ${foreignTableName}_max_sequence_id = LAST_INSERT_ID(${foreignTableName}_max_sequence_id +1);
 
@@ -206,7 +207,7 @@ BEGIN
         INSERT INTO ${foreignTableName}_sequence (
             table_name, ${foreignTableName}_id, ${foreignTableName}_max_sequence_id
         ) VALUES (
-            '${tableName}', NEW.${foreignTableName}_id, LAST_INSERT_ID(1)
+            '${tableNameOrAlias}', NEW.${foreignTableName}_id, LAST_INSERT_ID(1)
         ) ON DUPLICATE KEY
             UPDATE ${foreignTableName}_max_sequence_id = LAST_INSERT_ID(${foreignTableName}_max_sequence_id +1);
     

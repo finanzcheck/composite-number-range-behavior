@@ -13,7 +13,7 @@ class CompositeNumberRangeBehavior extends Behavior
 
     protected $parameters = array(
         'foreignTable' => null,
-        'compositeKeyColumnName' => null,
+        'localTableAlias' => null,
         'refPhpName' => null,
         'phpName' => null,
     );
@@ -32,6 +32,21 @@ class CompositeNumberRangeBehavior extends Behavior
         }
 
         return strtolower($table);
+    }
+
+    /**
+     * Returns the name that should be used (in column names) for the table that the behavior is applied to.
+     * The default is the actual table name, but it can be overridden with the localTableAlias parameter.
+     *
+     * @return string
+     */
+    public function getLocalTableName()
+    {
+        $alias = $this->getParameter('localTableAlias');
+        if ($alias == null) {
+            return $this->getTable()->getName();
+        }
+        return $alias;
     }
 
     /**
@@ -64,13 +79,7 @@ class CompositeNumberRangeBehavior extends Behavior
 
     public function getCompositeKeyColumnName()
     {
-        $name = $this->getParameter('compositeKeyColumnName');
-        if ($name) {
-            return $name;
-        }
-
-        $table = $this->getTable();
-        $tableName = $table->getName();
+        $tableName = $this->getLocalTableName();
         $foreignTableName = $this->getForeignTable();
 
         return $foreignTableName . '_' . $tableName . '_id';
