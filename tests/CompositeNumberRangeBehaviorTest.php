@@ -1,11 +1,12 @@
 <?php
 
-namespace Propel\Tests\Generator\Behavior\CompositeNumberRange;
+namespace Finanzcheck\CompositeNumberRange;
 
 use Finanzcheck\CompositeNumberRange\Platform\MysqlPlatform;
 use Propel\Generator\Util\QuickBuilder;
 use Propel\Runtime\Adapter\Pdo\MysqlAdapter;
 use Propel\Runtime\Collection\ObjectCollection;
+use Propel\Runtime\Propel;
 use Propel\Tests\TestCase;
 
 class CompositeNumberRangeBehaviorTest extends TestCase
@@ -35,7 +36,12 @@ EOF;
             $builder = new QuickBuilder();
             $builder->setPlatform(new MysqlPlatform());
             $builder->setSchema($schema);
-            $builder->build('mysql:host=127.0.0.1;dbname=' . getenv('DB_NAME'), getenv('DB_USER'), getenv('DB_PASS'), new MysqlAdapter());
+            $builder->build(
+                'mysql:host=127.0.0.1;dbname=' . getenv('DB_NAME'),
+                getenv('DB_USER'),
+                getenv('DB_PASS'),
+                new MysqlAdapter()
+            );
         }
 
         $this->parent = new \ParentTable();
@@ -164,6 +170,10 @@ EOF;
      */
     public function testNullingParentTableIdForExistingRowCreatesNewParentTableId()
     {
+        $tableMapClass = \ParentTable::TABLE_MAP;
+        $con = Propel::getServiceContainer()->getWriteConnection($tableMapClass::DATABASE_NAME);
+        $con->exec('ALTER TABLE child_table CHANGE parent_table_id parent_table_id INT(11) DEFAULT NULL');
+
         $parentId = $this->parent->getId();
 
         $child = new \ChildTable();
@@ -176,8 +186,64 @@ EOF;
 
         $child->setParentTableId(null);
         $child->save();
+        $child->reload();
 
         $this->assertGreaterThan($firstParentTableId, $child->getParentTableId());
+    }
+
+    public function testUsesTheLocalTableAliasParameterWhenGiven()
+    {
+        $schema = <<<EOF
+<database name="composite_number_range_test">
+    <table name="foo">
+        <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
+    </table>
+    <table name="bar">
+        <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
+        <behavior name="\Finanzcheck\CompositeNumberRange\CompositeNumberRangeBehavior">
+            <parameter name="foreignTable" value="foo"/>
+            <parameter name="localTableAlias" value="baz"/>
+        </behavior>
+    </table>
+</database>
+EOF;
+
+        $builder = new QuickBuilder();
+        $builder->setPlatform(new MysqlPlatform());
+        $builder->setSchema($schema);
+        $builder->build(
+            'mysql:host=127.0.0.1;dbname=' . getenv('DB_NAME'),
+            getenv('DB_USER'),
+            getenv('DB_PASS'),
+            new MysqlAdapter()
+        );
+
+        $this->assertTrue(class_exists('\Bar'));
+        $this->assertTrue(class_exists('\BarQuery'));
+        $this->assertTrue(class_exists('\Foo'));
+        $this->assertTrue(class_exists('\FooQuery'));
+        $this->assertTrue(class_exists('\FooSequence'));
+        $this->assertTrue(class_exists('\FooSequenceQuery'));
+
+        $entity = new \Bar();
+
+        $this->assertTrue(method_exists($entity, 'setFoo'));
+        $this->assertTrue(method_exists($entity, 'setFooId'));
+        $this->assertTrue(method_exists($entity, 'setFooBazId'));
+
+        $sequenceEntity = new \FooSequence();
+
+        $this->assertTrue(method_exists($sequenceEntity, 'setTableName'));
+        $this->assertTrue(method_exists($sequenceEntity, 'setFooId'));
+        $this->assertTrue(method_exists($sequenceEntity, 'setFooMaxSequenceId'));
+
+        $foo = new \Foo();
+        $foo->save();
+
+        $entity->setFoo($foo);
+        $entity->save();
+
+        $this->assertEquals($foo->getId(), $entity->getFooBazId());
     }
 }
  
