@@ -43,7 +43,7 @@ class CompositeNumberRangeBehavior extends Behavior
     public function getLocalTableName()
     {
         $alias = $this->getParameter('localTableAlias');
-        if ($alias == null) {
+        if ($alias === null) {
             return $this->getTable()->getName();
         }
         return $alias;

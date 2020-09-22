@@ -153,9 +153,10 @@ echo "Checking the {$table->getName()} \n";
         /** @var CompositeNumberRangeBehavior $behavior */
         $behavior = $table->getBehavior(self::BEHAVIOR_NAME);
         $compositeKeyColumnName = $behavior->getCompositeKeyColumnName();
+        $triggerColumnName = ucwords($compositeKeyColumnName, '_');
 
-        $insertTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'set' . ucfirst($compositeKeyColumnName))));
-        $updateTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'setOnUpdate' . ucfirst($compositeKeyColumnName))));
+        $insertTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'set' . $triggerColumnName)));
+        $updateTrigger = str_replace(' ', '', ucwords(str_replace('_', ' ', 'setOnUpdate' . $triggerColumnName)));
 
         return [ $insertTrigger, $updateTrigger ];
     }

@@ -92,6 +92,23 @@ $userDocumentId = $document->getUserDocumentId();
 // $userDocumentId contains 1
 ```
 
+## Table Name Aliases
+
+It is possible to use an alias instead of the actual table name for the auto-generated column and trigger names
+by specifying the `localTableAlias` parameter. For example, this definition:
+
+```xml
+<table name="document">
+    <column name="id" required="true" primaryKey="true" autoIncrement="true" type="INTEGER" />
+    <behavior name="\Finanzcheck\CompositeNumberRange\CompositeNumberRangeBehavior">
+        <parameter name="foreignTable" value="user"/>
+        <parameter name="localTableAlias" value="doc"/>
+    </behavior>
+</table>
+```
+
+will result in the composite id column being named `user_doc_id` and the trigger `SetDocUserId`.
+
 ## Migrations Notice
 Because `propel:migrations:diff` does not know anything about triggers, they have to be checked via SQL Statement. If you use triggers and change something on
 any table having triggers appended, they will always appear in your `down()` section of the migration. At the moment you have to remove them by hand,
