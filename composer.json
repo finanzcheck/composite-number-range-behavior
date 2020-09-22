@@ -13,6 +13,11 @@
       "Finanzcheck\\CompositeNumberRange\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Finanzcheck\\CompositeNumberRange\\": "tests/"
+    }
+  },
   "authors": [
     {
       "name": "Alexander Pinnecke",
